@@ -1,18 +1,5 @@
 defmodule ProgramAlarm do
   @moduledoc """
-  Documentation for ProgramAlarm.
+  ProgramAlarm solves the day two problems for Advent of Code 2019
   """
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> ProgramAlarm.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
 end
