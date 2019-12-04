@@ -1,0 +1,2 @@
+defmodule CountFuel do
+end
