@@ -3,8 +3,31 @@ defmodule ProgramAlarm.Process do
     :array.get(0, start(12, 2))
   end
 
-  def find_solution_two(noun, verb) do
-    :array.get(0, start(noun, verb))
+  def find_solution_two(objective) do
+    search(nil, objective, noun: 1, verb: 1)
+  end
+
+  def search(result, objective, noun: noun, verb: verb) when result == objective do
+    [noun: noun, verb: verb]
+  end
+
+  def search(_result, _objective, noun: 99, verb: 99) do
+    {:error, :not_found}
+  end
+
+  def search(_result, objective, noun: noun, verb: 99) do
+    new_result = :array.get(0, start(noun + 1, 1))
+    search(new_result, objective, noun: noun + 1, verb: 1)
+  end
+
+  def search(nil, objective, noun: noun, verb: verb) do
+    new_result = :array.get(0, start(noun, verb))
+    search(new_result, objective, noun: 1, verb: 1)
+  end
+
+  def search(_result, objective, noun: noun, verb: verb) do
+    new_result = :array.get(0, start(noun, verb + 1))
+    search(new_result, objective, noun: noun, verb: verb + 1)
   end
 
   def start(noun, verb) do
