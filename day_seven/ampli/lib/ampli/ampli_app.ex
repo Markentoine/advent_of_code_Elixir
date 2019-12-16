@@ -1,0 +1,2 @@
+defmodule AmpliApp do
+end

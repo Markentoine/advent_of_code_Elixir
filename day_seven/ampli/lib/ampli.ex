@@ -1,0 +1,2 @@
+defmodule Ampli do
+end

@@ -2,7 +2,27 @@ defmodule Orbit do
   @moduledoc """
   Day Six AoC 2019
   """
-  def run do
+  def runSolutionTwo do
+    {vertices, _} = define_vertices()
+    matrix = define_edges(vertices)
+    you = Map.fetch!(vertices, "YOU")
+    santa = Map.fetch!(vertices, "SAN")
+    com = Map.fetch!(vertices, "COM")
+    {parentSanta, parentYou} = retrieve_both_parents(santa, you, matrix)
+
+    common_parent =
+      retrieve_common_parent(
+        [parentSanta: parentSanta, parentYou: parentYou, com: com],
+        [],
+        [],
+        matrix
+      )
+
+    count_edges(common_parent, parentYou, 0, matrix) +
+      count_edges(common_parent, parentSanta, 0, matrix)
+  end
+
+  def runSolutionOne do
     {vertices, _} = define_vertices()
     matrix = define_edges(vertices)
     com = Map.fetch!(vertices, "COM")
@@ -10,6 +30,97 @@ defmodule Orbit do
   end
 
   # PRIVATE
+  defp count_edges(:stop, counter), do: counter
+
+  defp count_edges(source, destination, counter, matrix) do
+    if destination == source do
+      count_edges(:stop, counter)
+    else
+      count_edges(source, get_parents(destination, matrix), counter + 1, matrix)
+    end
+  end
+
+  defp retrieve_common_parent({:stop, commonAncestor}, _ancestorsSanta, _ancestorsYou, _matrix),
+    do: commonAncestor
+
+  defp retrieve_common_parent(
+         [parentSanta: parentSanta, parentYou: parentYou, com: com],
+         ancestorsSanta,
+         ancestorsYou,
+         matrix
+       ) do
+    ancestorSanta =
+      if parentSanta != com do
+        get_parents(parentSanta, matrix)
+      else
+        com
+      end
+
+    ancestorYou =
+      if parentYou != com do
+        get_parents(parentYou, matrix)
+      else
+        com
+      end
+
+    case ancestorSanta != com && Enum.member?(ancestorsYou, Integer.to_string(ancestorSanta)) do
+      true ->
+        retrieve_common_parent({:stop, ancestorSanta}, ancestorsSanta, ancestorsYou, matrix)
+
+      false ->
+        new_ancestorsSanta =
+          if ancestorSanta == com do
+            ancestorsSanta
+          else
+            [Integer.to_string(ancestorSanta) | ancestorsSanta]
+          end
+
+        case ancestorYou != com && Enum.member?(ancestorsSanta, Integer.to_string(ancestorYou)) do
+          true ->
+            retrieve_common_parent({:stop, ancestorYou}, ancestorsSanta, ancestorsYou, matrix)
+
+          false ->
+            new_ancestorsYou =
+              if ancestorYou == com do
+                ancestorsYou
+              else
+                [Integer.to_string(ancestorYou) | ancestorsYou]
+              end
+
+            retrieve_common_parent(
+              [parentSanta: ancestorSanta, parentYou: ancestorYou, com: com],
+              new_ancestorsSanta,
+              new_ancestorsYou,
+              matrix
+            )
+        end
+    end
+  end
+
+  defp retrieve_both_parents(a, b, matrix) do
+    parentA = get_parents(a, matrix)
+    parentB = get_parents(b, matrix)
+    {parentA, parentB}
+  end
+
+  defp get_parents(child, matrix) do
+    :array.foldr(
+      fn idx, row, result ->
+        if controlChildrenPresence(row, child) do
+          result = idx
+          result
+        else
+          result
+        end
+      end,
+      nil,
+      matrix
+    )
+  end
+
+  def controlChildrenPresence(row, children) do
+    :array.get(children, row) == 1
+  end
 
   defp countTotalEdges(:bottom, _matrix, count), do: count
 
@@ -18,7 +129,7 @@ defmodule Orbit do
     links =
       :array.get(entryPoint, matrix)
       |> :array.to_orddict()
-      |> Enum.filter(fn {index, value} -> value === 1 end)
+      |> Enum.filter(fn {_index, value} -> value === 1 end)
       |> Enum.map(fn {index, _value} -> index end)
 
     # IO.inspect(links)
