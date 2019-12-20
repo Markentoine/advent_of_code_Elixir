@@ -1,6 +1,28 @@
 defmodule Ampli.AmpliApp do
-  def run do
-    Ampli.Intcode.runProcess()
+  # def run do
+  #  Ampli.Intcode.runProcess()
+  # end
+  #
+  def solutionTwo do
+    [0, 1, 2, 3, 4]
+    |> all_permutations()
+    |> Enum.map(fn perm -> perm |> amplification(0) end)
+    |> Enum.max()
+  end
+
+  def solutionTwo(number) do
+    number
+    |> get_digits()
+    |> all_permutations()
+    |> Enum.map(fn perm -> perm |> amplification(0) end)
+    |> Enum.max()
+  end
+
+  def amplification([], output), do: output
+
+  def amplification([phase | rest], first_input) do
+    next_input = Ampli.Intcode.runProcess(first_input, phase)
+    amplification(rest, next_input)
   end
 
   def all_permutations([a, b]), do: [[a, b], [b, a]]
@@ -34,3 +56,9 @@ end
 # list -> list de list
 # perm(list) -> list enum map -> list n ++ perm(list - n)
 # perm(list one element) -> return element
+
+# amplification  -> perndre une liste de phases en input et une première input égale à 0
+# extraire le premier élément de la liste de phases, qui servira de premier input  demandée par process 3
+# lancer le process avec une position du pointeur à 0
+# le programme se charge et se déroule
+# process 3 prend input phase
